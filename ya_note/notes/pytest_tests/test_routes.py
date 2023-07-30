@@ -43,7 +43,7 @@ def test_pages_availability_for_anonymous_user(client, name):
         'notes:list',
         'notes:add',
         'notes:success'
-     ),
+    ),
 )
 def test_pages_availability_for_different_users(
         parametrized_client, name, note, expected_status

@@ -7,7 +7,7 @@ from notes.models import Note
 
 @pytest.fixture
 # Используем встроенную фикстуру для модели пользователей django_user_model.
-def author(django_user_model):  
+def author(django_user_model):
     return django_user_model.objects.create(username='Автор')
 
 
@@ -27,12 +27,14 @@ def note(author):
     )
     return note
 
+
 @pytest.fixture
 # Фикстура запрашивает другую фикстуру создания заметки.
-def slug_for_args(note):  
+def slug_for_args(note):
     # И возвращает кортеж, который содержит slug заметки.
     # На то, что это кортеж, указывает запятая в конце выражения.
     return note.slug,
+
 
 @pytest.fixture
 def form_data():
@@ -40,4 +42,4 @@ def form_data():
         'title': 'Новый заголовок',
         'text': 'Новый текст',
         'slug': 'new-slug'
-    } 
+    }
