@@ -1,11 +1,11 @@
 # test_logic.py
 from http import HTTPStatus
 from pytest_django.asserts import assertRedirects, assertFormError
-from notes.forms import WARNING
+
 import pytest
 from django.urls import reverse
 from pytils.translit import slugify
-
+from notes.forms import WARNING
 from notes.models import Note
 
 
