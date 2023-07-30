@@ -9,19 +9,6 @@ from pytils.translit import slugify
 from notes.models import Note
 
 
-def test_not_unique_slug(author_client, note, form_data):
-    "Невозможно создать две заметки с одинаковым slug"
-    url = reverse('notes:add')
-    # Подменяем slug новой заметки на slug уже существующей записи:
-    form_data['slug'] = note.slug
-    # Пытаемся создать новую заметку:
-    response = author_client.post(url, data=form_data)
-    # Проверяем, что в ответе содержится ошибка формы для поля slug:
-    assertFormError(response, 'form', 'slug', errors=(note.slug + WARNING))
-    # Убеждаемся, что количество заметок в базе осталось равным 1:
-    assert Note.objects.count() == 1
-
-
 def test_user_can_create_note(author_client, author, form_data):
     # Указываем фикстуру form_data в параметрах теста.
     url = reverse('notes:add')
@@ -58,6 +45,18 @@ def test_anonymous_user_cant_create_note(client, form_data):
     assertRedirects(response, expected_url)
     # Считаем количество заметок в БД, ожидаем 0 заметок.
     assert Note.objects.count() == 0
+
+
+def test_not_unique_slug(author_client, note, form_data):
+    url = reverse('notes:add')
+    # Подменяем slug новой заметки на slug уже существующей записи:
+    form_data['slug'] = note.slug
+    # Пытаемся создать новую заметку:
+    response = author_client.post(url, data=form_data)
+    # Проверяем, что в ответе содержится ошибка формы для поля slug:
+    assertFormError(response, 'form', 'slug', errors=(note.slug + WARNING))
+    # Убеждаемся, что количество заметок в базе осталось равным 1:
+    assert Note.objects.count() == 1
 
 
 def test_empty_slug(author_client, form_data):
