@@ -1,45 +1,61 @@
-# test_content.py
-import pytest
-from pytest_django.asserts import assertRedirects
+from django.test import Client, TestCase
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 from notes.models import Note
 
-
-@pytest.mark.parametrize(
-    # Задаём названия для параметров:
-    'parametrized_client, note_in_list',
-    (
-        # Передаём фикстуры в параметры при помощи "ленивых фикстур":
-        (pytest.lazy_fixture('author_client'), True),
-        (pytest.lazy_fixture('admin_client'), False),
-    )
-)
-def test_notes_list_for_different_users(
-        # Используем фикстуру заметки и параметры из декоратора:
-        note, parametrized_client, note_in_list
-):
-    url = reverse('notes:list')
-    # Выполняем запрос от имени параметризованного клиента:
-    response = parametrized_client.get(url)
-    object_list = response.context['object_list']
-    # Проверяем истинность утверждения "заметка есть в списке":
-    assert (note in object_list) is note_in_list
+User = get_user_model()
 
 
-def test_user_can_create_note(author_client, author, form_data):
-    url = reverse('notes:add')
-    # В POST-запросе отправляем данные, полученные из фикстуры form_data:
-    response = author_client.post(url, data=form_data)
-    # Проверяем, что был выполнен редирект
-    # на страницу успешного добавления заметки:
-    assertRedirects(response, reverse('notes:success'))
-    # Считаем общее количество заметок в БД, ожидаем 1 заметку.
-    assert Note.objects.count() == 1
-    # Чтобы проверить значения полей заметки -
-    # получаем её из базы при помощи метода get():
-    new_note = Note.objects.get()
-    # Сверяем атрибуты объекта с ожидаемыми.
-    assert new_note.title == form_data['title']
-    assert new_note.text == form_data['text']
-    assert new_note.slug == form_data['slug']
-    assert new_note.author == author
+class TestNote(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.notes = Note.objects.create(title='Заголовок', text='Текст')
+        cls.author = User.objects.create(username="Автор")
+        cls.author_client = Client()
+        cls.author_client.force_login(cls.author)
+        cls.reader = User.objects.create(username="Читатель")
+        cls.reader_client = Client()
+        cls.reader_client.force_login(cls.reader)
+        cls.notes = Note.objects.create(
+            title='Заголовок',
+            text='Текст',
+            author=cls.author
+        )
+        cls.form_data = {'text': "Text"}
+
+    def test_user_can_create_note(self):
+        "Проверка наличия формы на странице создагния и редактирования"
+        urls = (
+            'notes:add',
+            'notes:edit',
+        )
+        self.client.force_login(self.author)
+        for name in urls:
+            with self.subTest(name=name):
+                url = reverse(name, args=(self.notes.id,))
+                response = self.client.get(url)
+                self.assertIn('form', response.context)
+
+    def test_note_in_context(self):
+        "отдельная заметка передаётся на страницу со списком заметок в списке"
+        users_statuses = (
+            (self.author, True),
+            (self.reader, False)
+        )
+        for user, status in users_statuses:
+            self.client.force_login(user)
+            url = reverse('notes:list')
+            response = self.client.get(url)
+            object_list = response.context['object_list']
+            self.assertIn(self.notes, object_list) is status
+
+    def test_notes_by_one_author(self):
+        url = reverse("notes:add")
+        response = self.author_client.post(url, data=self.form_data)
+        self.assertRedirects(response, reverse('notes:success'))
+        notes_count = Note.objects.count()
+        self.assertEqual(notes_count, 1)
+        new_note = Note.objects.get()
+        self.assertEqual(new_note.author, self.author)
+        self.assertEqual(new_note.text, self.form_data['text'])

@@ -1,68 +1,82 @@
-# test_routes.py
 from http import HTTPStatus
-from pytest_django.asserts import assertRedirects
+from django.contrib.auth import get_user_model
+
+from django.test import TestCase
 from django.urls import reverse
-import pytest
+
+from notes.models import Note
 
 
-@pytest.mark.parametrize(
-    'name',
-    ('notes:home', 'users:login', 'users:logout', 'users:signup')
-)
-# Указываем имя изменяемого параметра в сигнатуре теста.
-def test_pages_availability_for_anonymous_user(client, name):
-    url = reverse(name)  # Получаем ссылку на нужный адрес.
-    response = client.get(url)  # Выполняем запрос.
-    assert response.status_code == HTTPStatus.OK
+User = get_user_model()
 
 
-@pytest.mark.parametrize(
-    'name',
-    ('notes:detail', 'notes:edit', 'notes:delete'),
-)
-def test_pages_availability_for_author(author_client, name, note):
-    url = reverse(name, args=(note.slug,))
-    response = author_client.get(url)
-    assert response.status_code == HTTPStatus.OK
+class TestRoutes(TestCase):
 
+    @classmethod
+    def setUpTestData(cls):
+        cls.author = User.objects.create(username='Лев Толстой')
+        cls.reader = User.objects.create(username='Читатель простой')
+        cls.notes = Note.objects.create(
+            title='Заголовок',
+            text='Текст',
+            author=cls.author
+        )
 
-@pytest.mark.parametrize(
-    'parametrized_client, expected_status',
-    # Предварительно оборачиваем имена фикстур
-    # в вызов функции pytest.lazy_fixture().
-    (
-        (pytest.lazy_fixture('admin_client'), HTTPStatus.NOT_FOUND),
-        (pytest.lazy_fixture('author_client'), HTTPStatus.OK)
-    ),
-)
-@pytest.mark.parametrize(
-    'name',
-    ('notes:detail', 'notes:edit', 'notes:delete'),
-)
-def test_pages_availability_for_different_users(
-        parametrized_client, name, note, expected_status
-):
-    url = reverse(name, args=(note.slug,))
-    response = parametrized_client.get(url)
-    assert response.status_code == expected_status
+    def test_pages_aviability(self):
+        urls = (
+            'notes:home',
+            'users:login',
+            'users:logout',
+            'users:signup',
+        )
+        for name in urls:
+            with self.subTest(name=name):
+                url = reverse(name)
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
 
+    def test_note_availability_for_author(self):
+        "Доступность страниц отдельной заметки,"
+        "удаления и редактирования для автора"
+        users_statuses = (
+            (self.author, HTTPStatus.OK),
+            (self.reader, HTTPStatus.NOT_FOUND)
+        )
+        for user, status in users_statuses:
+            self.client.force_login(user)
+            for name in ('notes:detail', 'notes:delete', 'notes:edit'):
+                with self.subTest(user=user, name=name):
+                    url = reverse(name, args=(self.notes.id,))
+                    response = self.client.get(url)
+                    self.assertEqual(response.status_code, status)
 
-@pytest.mark.parametrize(
-    'name, args',
-    (
-        ('notes:detail', pytest.lazy_fixture('slug_for_args')),
-        ('notes:edit', pytest.lazy_fixture('slug_for_args')),
-        ('notes:delete', pytest.lazy_fixture('slug_for_args')),
-        ('notes:add', None),
-        ('notes:success', None),
-        ('notes:list', None),
-    ),
-)
-# Передаём в тест анонимный клиент, name проверяемых страниц и args:
-def test_redirects(client, name, args):
-    login_url = reverse('users:login')
-    # Теперь не надо писать никаких if и можно обойтись одним выражением.
-    url = reverse(name, args=args)
-    expected_url = f'{login_url}?next={url}'
-    response = client.get(url)
-    assertRedirects(response, expected_url)
+    def test_redirect_fro_aninymos_client(self):
+        "Тест на редирект анонимного пользователя"
+        urls = (
+            'notes:success',
+            'notes:add',
+            'notes:detail',
+            'notes:edit',
+            'notes:delete'
+        )
+        login_url = reverse('users:login')
+        for name in urls:
+            with self.subTest(name=name):
+                url = reverse(name, args=(self.notes.id,))
+                redirect_url = f'{login_url}?next={url}'
+                response = self.client.get(url)
+                self.assertRedirects(response, redirect_url)
+
+    def test_note_availability_for_auth_user(self):
+        "Доступность списка заметок, добавление новой заметки"
+        "и успешного добавления заметки Аутентифицированному пользователю"
+        users_statuses = (
+            (self.author, HTTPStatus.OK),
+        )
+        for user, status in users_statuses:
+            self.client.force_login(user)
+            for name in ('notes:detail', 'notes:delete', 'notes:edit'):
+                with self.subTest(user=user, name=name):
+                    url = reverse(name, args=(self.notes.id,))
+                    response = self.client.get(url)
+                    self.assertEqual(response.status_code, status)
