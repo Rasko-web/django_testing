@@ -1,7 +1,6 @@
 import pytest
 from django.urls import reverse
-from django.conf import settings
-from models import News
+
 
 @pytest.mark.django_db
 def test_count_on_news_page(list_of_news, client):
