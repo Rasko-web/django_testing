@@ -3,16 +3,11 @@ from django.urls import reverse
 from django.conf import settings
 from models import News
 
-
-def test_count_on_news_page(author_client):
+@pytest.mark.django_db
+def test_count_on_news_page(list_of_news, client):
     "Тест на колличество записей на странице"
-    all_news = [
-        News(title=f'Заголовок {index}')
-        for index in range(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
-    ],
-    News.objects.create(all_news)
     url = reverse('news:home')
-    response = author_client.get(url)
+    response = client.get(url)
     object_list = response.context['object_list']
     news_count = len(object_list)
     assert news_count == 10
