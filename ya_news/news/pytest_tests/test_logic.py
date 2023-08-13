@@ -44,7 +44,7 @@ def test_author_can_edit_comment(
         form_data,
         pk_for_args,
         comment
-        ):
+    ):
     "Автор может редактировать свой комментарий"
     url = reverse('news:edit', args=(pk_for_args,))
     response = author_client.post(url, form_data)
@@ -59,7 +59,7 @@ def test_other_user_cant_edit_note(
         form_data,
         pk_for_args,
         comment
-        ):
+    ):
     "Пользователь не может редактировать чужой комментарий"
     url = reverse('news:edit', args=(pk_for_args,))
     response = admin_client.post(url, form_data)
