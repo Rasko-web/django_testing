@@ -85,10 +85,10 @@ def test_other_user_cant_edit_note(
 
 
 @pytest.mark.django_db
-def test_other_user_cant_delete_comment(admin_client, form_data, pk_for_args):
+def test_other_user_cant_delete_comment(admin_client, form_data, news):
     "Пользователь не может удалить чужой комментарий"
-    url = reverse('news:delete', args=pk_for_args)
-    response = admin_client.post(url)
+    url = reverse('news:delete', args=(news.id))
+    response = admin_client.post(url, form_data)
     assert response.status_code == HTTPStatus.NOT_FOUND
     commets_count = Comment.objects.count()
     assert commets_count == 1
