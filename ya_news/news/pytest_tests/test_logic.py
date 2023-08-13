@@ -7,11 +7,18 @@ from news.models import Comment
 from news.forms import WARNING, BAD_WORDS
 
 
-def test_user_can_create_note(author_client, author, form_data):
+def test_user_can_create_comment(
+        author_client,
+        author,
+        form_data,
+        news,
+        comment):
     "Авторизированный пользоваетль может оставить комментарий"
     url = reverse('news:edit')
     response = author_client.post(url, data=form_data)
-    assertRedirects(response, reverse('notes:success'))
+    redirect = (reverse('news:detail', args=(news.id,))) + '#comments'
+    comment.refresh_from_db()
+    assertRedirects(response, redirect)
     assert Comment.objects.count() == 1
     new_comment = Comment.objects.get()
     assert new_comment.text == form_data['text']
@@ -19,11 +26,10 @@ def test_user_can_create_note(author_client, author, form_data):
 
 
 @pytest.mark.django_db
-def test_anonymous_user_cant_create_note(client, form_data):
+def test_anonymous_user_cant_create_comment(client, form_data):
     "Анонимный пользоваетль не может оставить комментарий"
     url = reverse('news:edit')
-    response = client.post(url, data=form_data)
-    assertRedirects(response, url)
+    client.post(url, data=form_data)
     assert Comment.objects.count() == 0
 
 
