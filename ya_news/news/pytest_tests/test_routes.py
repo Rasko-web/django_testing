@@ -7,28 +7,25 @@ import pytest
 @pytest.mark.parametrize(
     'name, args',
     (
-        ('news:detail', pytest.lazy_fixture('news.id')),
         ('news:home', None),
-        ('users:login', None),
-        ('users:logout', None),
+        ('news:detail', pytest.lazy_fixture('news.pk')),
+        ('users:login', None), 
+        ('users:logout', None), 
         ('users:signup', None)
     )
 )
 # Указываем имя изменяемого параметра в сигнатуре теста.
-def test_pages_availability_for_anonymous_user(client, name, news):
-    # Главная, страница новости, регистрации,
-    # логина и выхода из аккаунта доступны анонимному пользователю:
-    url = reverse(name, args=news.id)
+def test_pages_availability_for_anonymous_user(client, name, args):
+    #Главная, страница новости, регистрации, логина и выхода из аккаунта доступны анонимному пользователю:
+    url = reverse(name, args=args)
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
 
 
 @pytest.mark.parametrize(
-    'parametrized_client, expected_status', 'name'
+    'parametrized_client, expected_status',
     (
         (pytest.lazy_fixture('admin_client'), HTTPStatus.NOT_FOUND),
-        (pytest.lazy_fixture('admin_client'), HTTPStatus.NOT_FOUND),
-        (pytest.lazy_fixture('author_client'), HTTPStatus.OK),
         (pytest.lazy_fixture('author_client'), HTTPStatus.OK)
     ),
 )
@@ -37,11 +34,10 @@ def test_pages_availability_for_anonymous_user(client, name, news):
     ('news:edit', 'news:delete'),
 )
 def test_pages_availability_for_different_users(
-    # Проверка доступности страниц редактирования
-    # и удаления комментария автором и другим пользователем
-        parametrized_client, expected_status, name, news
+    #Проверка доступности страниц редактирования и удаления комментария автором и другим пользователем
+        parametrized_client, name, news, expected_status
 ):
-    url = reverse(name, args=(news.id))
+    url = reverse(name, args=(news.pk,))
     response = parametrized_client.get(url)
     assert response.status_code == expected_status
 
@@ -49,10 +45,11 @@ def test_pages_availability_for_different_users(
 @pytest.mark.parametrize(
     'name, args',
     (
-        ('news:edit', pytest.lazy_fixture('news.id')),
-        ('news:delete', pytest.lazy_fixture('news.id')),
+        ('news:edit', pytest.lazy_fixture('news.pk')),
+        ('news:delete', pytest.lazy_fixture('news.pk')),
     ),
 )
+
 def test_redirects(client, name, args):
     # Тест на перенаправление анонимного пользователя на страницу логина
     login_url = reverse('users:login')
