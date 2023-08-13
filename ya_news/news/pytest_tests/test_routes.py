@@ -50,7 +50,7 @@ def test_pages_availability_for_different_users(
         ('news:delete', pytest.lazy_fixture('news.pk')),
     ),
 )
-def test_redirects(client, name, args):
+def test_redirects(client, name, args, news):
     # Тест на перенаправление анонимного пользователя на страницу логина
     login_url = reverse('users:login')
     url = reverse(name, args=args)
