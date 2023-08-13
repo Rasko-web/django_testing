@@ -23,6 +23,7 @@ def test_anonymous_user_cant_create_note(client, form_data):
     "Анонимный пользоваетль не может оставить комментарий"
     url = reverse('news:edit')
     response = client.post(url, data=form_data)
+    assertRedirects(response, url)
     assert Comment.objects.count() == 0
 
 
