@@ -9,14 +9,15 @@ import pytest
     (
         ('news:home', None),
         ('news:detail', pytest.lazy_fixture('news.pk')),
-        ('users:login', None), 
-        ('users:logout', None), 
+        ('users:login', None),
+        ('users:logout', None),
         ('users:signup', None)
     )
 )
 # Указываем имя изменяемого параметра в сигнатуре теста.
 def test_pages_availability_for_anonymous_user(client, name, args):
-    #Главная, страница новости, регистрации, логина и выхода из аккаунта доступны анонимному пользователю:
+    # Главная, страница новости, регистрации,
+    # логина и выхода из аккаунта доступны анонимному пользователю:
     url = reverse(name, args=args)
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
@@ -34,7 +35,8 @@ def test_pages_availability_for_anonymous_user(client, name, args):
     ('news:edit', 'news:delete'),
 )
 def test_pages_availability_for_different_users(
-    #Проверка доступности страниц редактирования и удаления комментария автором и другим пользователем
+    # Проверка доступности страниц редактирования
+    # и удаления комментария автором и другим пользователем
         parametrized_client, name, news, expected_status
 ):
     url = reverse(name, args=(news.pk,))
@@ -49,7 +51,6 @@ def test_pages_availability_for_different_users(
         ('news:delete', pytest.lazy_fixture('news.pk')),
     ),
 )
-
 def test_redirects(client, name, args):
     # Тест на перенаправление анонимного пользователя на страницу логина
     login_url = reverse('users:login')
