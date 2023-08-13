@@ -26,15 +26,15 @@ def test_pages_availability_for_anonymous_user(client, name, args):
 @pytest.mark.parametrize(
     'parametrized_client, expected_status', 'name'
     (
-        (pytest.lazy_fixture('admin_client'),
-         HTTPStatus.NOT_FOUND,
-         'news:edit'),
-        (pytest.lazy_fixture('admin_client'),
-         HTTPStatus.NOT_FOUND,
-         'news:delete'),
-        (pytest.lazy_fixture('author_client'), HTTPStatus.OK, 'news:edit'),
-        (pytest.lazy_fixture('author_client'), HTTPStatus.OK, 'news:delete')
+        (pytest.lazy_fixture('admin_client'), HTTPStatus.NOT_FOUND),
+        (pytest.lazy_fixture('admin_client'), HTTPStatus.NOT_FOUND),
+        (pytest.lazy_fixture('author_client'), HTTPStatus.OK),
+        (pytest.lazy_fixture('author_client'), HTTPStatus.OK)
     ),
+)
+@pytest.mark.parametrize(
+    'name',
+    ('news:edit', 'news:delete'),
 )
 def test_pages_availability_for_different_users(
     # Проверка доступности страниц редактирования
