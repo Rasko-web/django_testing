@@ -44,16 +44,16 @@ def test_pages_availability_for_different_users(
 
 
 @pytest.mark.parametrize(
-    'name, args',
+    'name'
     (
-        ('news:edit', pytest.lazy_fixture('pk_for_args')),
-        ('news:delete', pytest.lazy_fixture('pk_for_args')),
+        'news:edit',
+        'news:delete'
     ),
 )
-def test_redirects(admin_client, name, args, pk_for_args):
+def test_redirects(admin_client, name, comment):
     # Тест на перенаправление анонимного пользователя на страницу логина
     login_url = reverse('users:login')
-    url = reverse(name, args=args)
+    url = reverse(name, args=comment.id)
     expected_url = f'{login_url}?next={url}'
     response = admin_client.get(url)
     assert response == expected_url
