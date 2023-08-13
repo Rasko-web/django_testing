@@ -3,8 +3,8 @@ from pytest_django.asserts import assertRedirects, assertFormError
 import pytest
 from django.urls import reverse
 
-from models import Comment
-from forms import WARNING, BAD_WORDS
+from news.models import Comment
+from news.forms import WARNING, BAD_WORDS
 
 
 def test_user_can_create_note(author_client, author, form_data):
