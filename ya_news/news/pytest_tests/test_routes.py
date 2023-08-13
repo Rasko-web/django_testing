@@ -7,7 +7,7 @@ import pytest
 @pytest.mark.parametrize(
     'name, args',
     (
-        ('news:detail', pytest.lazy_fixture('pk_for_args')),
+        ('news:detail', pytest.lazy_fixture('news.id')),
         ('news:home', None),
         ('users:login', None),
         ('users:logout', None),
@@ -15,10 +15,10 @@ import pytest
     )
 )
 # Указываем имя изменяемого параметра в сигнатуре теста.
-def test_pages_availability_for_anonymous_user(client, name, pk_for_args):
+def test_pages_availability_for_anonymous_user(client, name, news):
     # Главная, страница новости, регистрации,
     # логина и выхода из аккаунта доступны анонимному пользователю:
-    url = reverse(name, args=pk_for_args)
+    url = reverse(name, args=news.id)
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
 
@@ -49,8 +49,8 @@ def test_pages_availability_for_different_users(
 @pytest.mark.parametrize(
     'name, args',
     (
-        ('news:edit', pytest.lazy_fixture('pk_for_args')),
-        ('news:delete', pytest.lazy_fixture('pk_for_args')),
+        ('news:edit', pytest.lazy_fixture('news.id')),
+        ('news:delete', pytest.lazy_fixture('news.id')),
     ),
 )
 def test_redirects(client, name, args):
