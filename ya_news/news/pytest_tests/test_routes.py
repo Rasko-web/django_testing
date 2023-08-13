@@ -53,7 +53,7 @@ def test_pages_availability_for_different_users(
 def test_redirects(admin_client, name, comment):
     # Тест на перенаправление анонимного пользователя на страницу логина
     login_url = reverse('users:login')
-    url = reverse(name, args=comment.id)
+    url = reverse(name, args=(comment.id,))
     expected_url = f'{login_url}?next={url}'
     response = admin_client.get(url)
     assert response == expected_url
