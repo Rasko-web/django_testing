@@ -11,18 +11,17 @@ def test_user_can_create_comment(
         author_client,
         author,
         form_data,
-        news,
-        comment):
+        news,):
     "Авторизированный пользоваетль может оставить комментарий"
-    url = reverse('news:edit')
+    url = reverse('news:detail', args=(news.id,))
     response = author_client.post(url, data=form_data)
-    redirect = (reverse('news:detail', args=(news.id,))) + '#comments'
-    comment.refresh_from_db()
-    assertRedirects(response, redirect)
-    assert Comment.objects.count() == 1
+    assert response.status_code == 302
+    comments_count = Comment.objects.count()
+    assert comments_count == 1
     new_comment = Comment.objects.get()
     assert new_comment.text == form_data['text']
     assert new_comment.author == author
+    assert new_comment.news == news
 
 
 @pytest.mark.django_db
