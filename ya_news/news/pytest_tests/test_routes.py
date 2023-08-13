@@ -39,9 +39,9 @@ def test_pages_availability_for_anonymous_user(client, name, args):
 def test_pages_availability_for_different_users(
     # Проверка доступности страниц редактирования
     # и удаления комментария автором и другим пользователем
-        parametrized_client, expected_status, name, pk_for_args
+        parametrized_client, expected_status, name, news
 ):
-    url = reverse(name, args=(pk_for_args))
+    url = reverse(name, args=(news.id))
     response = parametrized_client.get(url)
     assert response.status_code == expected_status
 
