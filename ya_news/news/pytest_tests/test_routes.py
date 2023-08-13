@@ -1,5 +1,6 @@
 from http import HTTPStatus
 from django.urls import reverse
+from pytest_django.asserts import assertRedirects
 import pytest
 
 
@@ -53,4 +54,4 @@ def test_redirects(admin_client, name, comment):
     url = reverse(name, args=(comment.id,))
     expected_url = f'{login_url}?next={url}'
     response = admin_client.get(url)
-    assert str(response) == expected_url
+    assertRedirects(response, expected_url)
