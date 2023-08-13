@@ -38,36 +38,42 @@ def test_warning_words(author_client, pk_for_args, form_data):
     assert Comment.objects.count() == 1
 
 
-def test_author_can_edit_comment(author_client, form_data, pk_for_args):
+@pytest.mark.django_db
+def test_author_can_edit_comment(author_client, form_data, pk_for_args, comment):
     "Автор может редактировать свой комментарий"
     url = reverse('news:edit', args=(pk_for_args,))
     response = author_client.post(url, form_data)
     assertRedirects(response, reverse('news:edit'))
-    pk_for_args.refresh_from_db()
-    assert pk_for_args.text == form_data['text']
+    comment.refresh_from_db()
+    assert comment.text == form_data['text']
 
 
-def test_other_user_cant_edit_note(admin_client, form_data, pk_for_args):
+@pytest.mark.django_db
+def test_other_user_cant_edit_note(admin_client, form_data, pk_for_args, comment):
     "Пользователь не может редактировать чужой комментарий"
     url = reverse('news:edit', args=(pk_for_args,))
     response = admin_client.post(url, form_data)
     assert response.status_code == HTTPStatus.NOT_FOUND
     # Получаем новый объект запросом из БД.
     comment_from_db = Comment.objects.get(id=pk_for_args)
-    assert pk_for_args.text == comment_from_db .text
+    assert comment.text == comment_from_db.text
 
 
+@pytest.mark.django_db
 def test_author_can_delete_comment(author_client, pk_for_args):
     "Автор комментария может удалить свой комментарий"
     url = reverse('news:delete', args=pk_for_args)
     response = author_client.post(url)
     assertRedirects(response, reverse('notes:success'))
-    assert Comment.objects.count() == 0
+    commets_count = Comment.objects.count()
+    assert commets_count == 0
 
 
+@pytest.mark.django_db
 def test_other_user_cant_delete_comment(admin_client, form_data, pk_for_args):
     "Пользователь не может удалить чужой комментарий"
     url = reverse('news:delete', args=pk_for_args)
     response = admin_client.post(url)
     assert response.status_code == HTTPStatus.NOT_FOUND
-    assert Comment.objects.count() == 1
+    commets_count = Comment.objects.count()
+    assert commets_count == 1
