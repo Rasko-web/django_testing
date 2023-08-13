@@ -46,11 +46,11 @@ def test_pages_availability_for_different_users(
 @pytest.mark.parametrize(
     'name, args',
     (
-        ('news:edit', pytest.lazy_fixture('news.id')),
-        ('news:delete', pytest.lazy_fixture('news.id')),
+        ('news:edit', pytest.lazy_fixture('pk_for_args')),
+        ('news:delete', pytest.lazy_fixture('pk_for_args')),
     ),
 )
-def test_redirects(client, name, args, news):
+def test_redirects(client, name, args, pk_for_args):
     # Тест на перенаправление анонимного пользователя на страницу логина
     login_url = reverse('users:login')
     url = reverse(name, args=args)
