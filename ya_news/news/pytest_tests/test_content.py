@@ -41,8 +41,8 @@ def test_anonymous_client_has_no_form(client, pk_for_args):
     assert 'form' not in response.context
 
 
-def test_auth__client_have_form(author_client, pk_for_args):
+def test_auth__client_have_form(admin_client, pk_for_args):
     "Авторизированныей пользователь имеет форму отправки комментария"
     url = reverse('news:detail', args=(pk_for_args))
-    response = author_client.get(url)
+    response = admin_client.get(url)
     assert 'form' in response.context
