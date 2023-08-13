@@ -15,10 +15,10 @@ import pytest
     )
 )
 # Указываем имя изменяемого параметра в сигнатуре теста.
-def test_pages_availability_for_anonymous_user(client, name, args):
+def test_pages_availability_for_anonymous_user(client, name, pk_for_args):
     # Главная, страница новости, регистрации,
     # логина и выхода из аккаунта доступны анонимному пользователю:
-    url = reverse(name, args=args)
+    url = reverse(name, args=pk_for_args)
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
 
