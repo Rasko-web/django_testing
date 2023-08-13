@@ -46,12 +46,13 @@ def test_warning_words(author_client, form_data):
 def test_author_can_edit_comment(
         author_client,
         form_data,
-        pk_for_args,
+        news,
         comment):
     "Автор может редактировать свой комментарий"
-    url = reverse('news:edit', args=(pk_for_args,))
+    url = reverse('news:edit', args=(news.id,))
     response = author_client.post(url, form_data)
-    assertRedirects(response, reverse('news:edit'))
+    redirect = (reverse('news:detail', args=(news.id,))) + '#comments'
+    assertRedirects(response, redirect)
     comment.refresh_from_db()
     assert comment.text == form_data['text']
 
