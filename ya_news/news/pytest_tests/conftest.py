@@ -21,7 +21,6 @@ def news(author):
     news = News.objects.create(
         title='Заголовок',
         text='Текст заметки',
-        pk=news.pk,
     )
     return news
 
