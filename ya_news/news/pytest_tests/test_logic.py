@@ -3,8 +3,8 @@ from pytest_django.asserts import assertRedirects, assertFormError
 import pytest
 from django.urls import reverse
 
-from news.models import Comment
-from news.forms import WARNING
+from models import Comment
+from forms import WARNING, BAD_WORDS
 
 
 def test_user_can_create_note(author_client, author, form_data):
@@ -27,13 +27,19 @@ def test_anonymous_user_cant_create_note(client, form_data):
     assert Comment.objects.count() == 0
 
 
-def test_warning_words(author_client, pk_for_args, form_data):
+def test_warning_words(author_client, form_data):
     "Проверка на наличии запрещенных слов"
+    bad_words_data = f'Text {BAD_WORDS[0]}'
     url = reverse('news:edit')
-    form_data['pk'] = pk_for_args
-    response = author_client.post(url, data=form_data)
-    assertFormError(response, 'form', 'slug', errors=(pk_for_args + WARNING))
-    assert Comment.objects.count() == 1
+    response = author_client.post(url, data=bad_words_data)
+    assertFormError(
+        response,
+        form='form',
+        field='text',
+        errors=WARNING
+    )
+    comments_count = Comment.objects.count()
+    assert comments_count == 0
 
 
 @pytest.mark.django_db
