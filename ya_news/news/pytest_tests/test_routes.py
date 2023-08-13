@@ -7,18 +7,18 @@ import pytest
     'name, args',
     (
         ('news:home', None),
-        ('news:detail', pytest.lazy_fixture('news.id')),
+        ('news:detail', pytest.lazy_fixture('pk_for_args')),
         ('users:login', None),
         ('users:logout', None),
         ('users:signup', None)
     )
 )
 # Указываем имя изменяемого параметра в сигнатуре теста.
-def test_pages_availability_for_anonymous_user(client, name, args, news):
+def test_pages_availability_for_anonymous_user(author_client, name, args):
     # Главная, страница новости, регистрации,
     # логина и выхода из аккаунта доступны анонимному пользователю:
     url = reverse(name, args=args)
-    response = client.get(url)
+    response = author_client.get(url)
     assert response.status_code == HTTPStatus.OK
 
 
