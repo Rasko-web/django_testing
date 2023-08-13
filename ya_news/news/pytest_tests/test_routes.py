@@ -45,7 +45,7 @@ def test_pages_availability_for_different_users(
 
 
 @pytest.mark.parametrize(
-    'name'
+    'name',
     ('news:edit', 'news:delete'),
 )
 def test_redirects(client, name, comment):
