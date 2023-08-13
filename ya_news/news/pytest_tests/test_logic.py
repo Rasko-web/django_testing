@@ -39,7 +39,12 @@ def test_warning_words(author_client, pk_for_args, form_data):
 
 
 @pytest.mark.django_db
-def test_author_can_edit_comment(author_client, form_data, pk_for_args, comment):
+def test_author_can_edit_comment(
+        author_client,
+        form_data,
+        pk_for_args,
+        comment
+        ):
     "Автор может редактировать свой комментарий"
     url = reverse('news:edit', args=(pk_for_args,))
     response = author_client.post(url, form_data)
@@ -49,7 +54,12 @@ def test_author_can_edit_comment(author_client, form_data, pk_for_args, comment)
 
 
 @pytest.mark.django_db
-def test_other_user_cant_edit_note(admin_client, form_data, pk_for_args, comment):
+def test_other_user_cant_edit_note(
+        admin_client,
+        form_data,
+        pk_for_args,
+        comment
+        ):
     "Пользователь не может редактировать чужой комментарий"
     url = reverse('news:edit', args=(pk_for_args,))
     response = admin_client.post(url, form_data)
