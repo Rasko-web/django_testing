@@ -46,12 +46,12 @@ def test_pages_availability_for_different_users(
 
 @pytest.mark.parametrize(
     'name'
-    ('news:edit_comment', 'news:delete_comment'),
+    ('news:edit', 'news:delete'),
 )
-def test_redirects(admin_client, name, comment):
+def test_redirects(client, name, comment):
     # Тест на перенаправление анонимного пользователя на страницу логина
-    login_url = reverse('users:login')
     url = reverse(name, args=(comment.id,))
+    login_url = reverse('users:login')
     expected_url = f'{login_url}?next={url}'
-    response = admin_client.get(url)
+    response = client.get(url)
     assertRedirects(response, expected_url)
