@@ -20,19 +20,17 @@ class TestNote(TestCase):
         )
         cls.form_data = {'text': "Text"}
 
-    def test_author_have_form_on_add(self):
-        "Проверка наличия формы на странице создания"
-        self.client.force_login(self.author)
-        url = reverse('notes:add')
-        response = self.client.get(url)
-        self.assertIn('from', response.context)
-
-    def test_author_have_form_on_edit(self):
-        "Проверка наличия формы на странице редактированя"
-        self.client.force_login(self.author)
-        url = reverse('notes:edit', args=(self.notes.id,))
-        response = self.client.get(url)
-        self.assertIn('from', response.context)
+    def test_author_have_form_on_add_and_edit(self):
+        "Проверка наличия формы на странице создания и редактирования"
+        urls = (
+            ('notes:add', None),
+            ('notes:edit', self.notes.id)
+        )
+        for name, argument in urls:
+            self.client.force_login(self.author)
+            url = reverse(name, args=(argument,))
+            response = self.client.get(url)
+            self.assertIn('form', response.context)
 
     def test_note_in_context(self):
         "отдельная заметка передаётся на страницу со списком заметок в списке"
