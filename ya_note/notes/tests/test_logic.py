@@ -16,6 +16,7 @@ class TestNoteCreation(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create(username="Простой Человек")
+        cls.user_client = Client()
         cls.author = User.objects.create(username='Автор')
         cls.reader = User.objects.create(username='Читатель')
         cls.notes = Note.objects.create(
@@ -31,7 +32,7 @@ class TestNoteCreation(TestCase):
     def test_anonymous_user_cant_create_note(self):
         "Анонимный пользователь не может оставить заметку"
         url = reverse('notes:detail', args=(self.notes.slug,))
-        response = self.user.post(url, data=self.form_data)
+        response = self.user_client.post(url, data=self.form_data)
         self.assertEqual(response, HTTPStatus.NOT_FOUND)
         note_count = Note.objects.count()
         self.assertEqual(note_count, 0)
@@ -50,19 +51,20 @@ class TestNoteCreation(TestCase):
 
     def test_empty_slug(self):
         "Тест на пустой Slug"
+        self.client.force_login(self.author)
         url = reverse('notes:add')
         self.form_data.pop(self.notes.slug)
         response = self.author_client.post(url, data=self.form_data)
         self.assertRedirects(response, reverse('notes:success'))
         notes_count = Note.objects.count()
         self.assertEqual(notes_count, 1)
-
         self.new_note = Note.objects.get()
         self.expected_slug = slugify(self.form_data['title'])
         self.assertEqual(self.new_note.slug, self.expected_slug)
 
     def test_not_unique_slug(self):
         "Тест на неуникальный Slug"
+        self.client.force_login(self.author)
         url = reverse('notes:add')
         self.form_data[self.notes.slug] = self.notes.id
         response = self.author_client.get(url, data=self.form_data)
