@@ -90,9 +90,9 @@ def test_other_user_cant_edit_note(
 
 
 @pytest.mark.django_db
-def test_other_user_cant_delete_comment(admin_client, comment, news):
+def test_other_user_cant_delete_comment(admin_client, news, comment):
     "Пользователь не может удалить чужой комментарий"
-    url = reverse('news:delete', args=(comment.id))
+    url = reverse('news:delete', args=(comment.id,))
     response = admin_client.post(url)
     redirect = (reverse('news:detail', args=(news.id,))) + '#comments'
     assertRedirects(response, redirect)
