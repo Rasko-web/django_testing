@@ -16,8 +16,12 @@ class TestNoteCreation(TestCase):
     def setUpTestData(cls):
         cls.notes = Note.objects.create(title='Заголовок', text='Текст')
         cls.user = User.objects.create(username="Простой Человек")
-        cls.auth_client = Client()
-        cls.auth_client.force_login(cls.user)
+        cls.author = User.objects.create(username='Автор')
+        cls.reader = User.objects.create(username='Читатель')
+        cls.author_client = Client()
+        cls.author_client.force_login(cls.author)
+        cls.reader_client = Client()
+        cls.reader_client.force_login(cls.reader)
         cls.form_data = {'text': cls.NOTE_TEXT}
 
     def test_anonymous_user_cant_create_note(self):
@@ -30,7 +34,7 @@ class TestNoteCreation(TestCase):
     def test_user_can_create_note(self):
         "Пользователь может оставить заметку"
         url = reverse('notes:detail', args=(self.notes.id,))
-        response = self.auth_client.post(url, data=self.form_data)
+        response = self.author_client.post(url, data=self.form_data)
         self.assertRedirects(response, f'{url}#list')
         note_count = Note.objects.count()
         self.assertEqual(note_count, 1)
