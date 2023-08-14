@@ -65,10 +65,12 @@ def test_author_can_edit_comment(
 
 
 @pytest.mark.django_db
-def test_author_can_delete_comment(author_client, news, comment):
+def test_author_can_delete_comment(author_client, news, comment, form_data):
     "Автор комментария может удалить свой комментарий"
     url = reverse('news:delete', args=(news.id,))
-    author_client.post(url)
+    response = author_client.post(url, form_data)
+    redirect = (reverse('news:detail', args=(news.id,))) + '#comments'
+    assertRedirects(response, redirect)
     comment.refresh_from_db()
     commets_count = Comment.objects.count()
     assert commets_count == 0
