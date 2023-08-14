@@ -25,11 +25,12 @@ def test_user_can_create_comment(
 
 
 @pytest.mark.django_db
-def test_anonymous_user_cant_create_comment(client, form_data):
+def test_anonymous_user_cant_create_comment(client, form_data, news):
     "Анонимный пользоваетль не может оставить комментарий"
-    url = reverse('news:edit')
+    url = reverse('news:detail', args=(news.id,))
     client.post(url, data=form_data)
-    assert Comment.objects.count() == 0
+    comments_count = Comment.objects.count()
+    assert comments_count == 0
 
 
 def test_warning_words(author_client, form_data):
