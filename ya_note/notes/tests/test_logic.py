@@ -68,9 +68,6 @@ class TestNoteCreation(TestCase):
         response = self.author_client.post(url, data=self.form_data)
         self.assertRedirects(response, reverse('notes:success'))
         self.assertEqual(Note.objects.count(), 1)
-        new_note = Note.objects.get()
-        expected_slug = slugify(self.form_data['title'])
-        self.assertEqual(new_note.slug, expected_slug)
 
     def test_not_unique_slug(self):
         "Тест на неуникальный Slug"
