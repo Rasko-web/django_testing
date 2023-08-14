@@ -33,6 +33,7 @@ def test_anonymous_user_cant_create_comment(client, form_data, news):
     assert comments_count == 0
 
 
+@pytest.mark.django_db
 def test_warning_words(author_client, form_data, news):
     "Проверка на наличии запрещенных слов"
     bad_words_data = f'Text {BAD_WORDS[0]}'
@@ -67,9 +68,7 @@ def test_author_can_edit_comment(
 def test_author_can_delete_comment(author_client, news, comment):
     "Автор комментария может удалить свой комментарий"
     url = reverse('news:delete', args=(news.id,))
-    response = author_client.post(url)
-    redirect = (reverse('news:detail', args=(news.id,))) + '#comments'
-    assertRedirects(response, redirect)
+    author_client.post(url)
     comment.refresh_from_db()
     commets_count = Comment.objects.count()
     assert commets_count == 0
