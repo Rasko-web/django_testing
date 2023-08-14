@@ -15,13 +15,13 @@ class TestNoteCreation(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.notes = Note.objects.create(
-            title='Заголовок',
-            text='Текст',
-            slug='slug')
         cls.user = User.objects.create(username="Простой Человек")
         cls.author = User.objects.create(username='Автор')
         cls.reader = User.objects.create(username='Читатель')
+        cls.notes = Note.objects.create(
+            title='Заголовок',
+            text='Текст',
+            author=cls.author)
         cls.author_client = Client()
         cls.author_client.force_login(cls.author)
         cls.reader_client = Client()
