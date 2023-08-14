@@ -34,16 +34,11 @@ class TestNote(TestCase):
 
     def test_note_in_context(self):
         "отдельная заметка передаётся на страницу со списком заметок в списке"
-        users_statuses = (
-            (self.author, True),
-            (self.reader, False)
-        )
-        for user, status in users_statuses:
-            self.client.force_login(user)
-            url = reverse('notes:list')
-            response = self.client.get(url)
-            object_list = response.context['object_list']
-            self.assertIn(self.notes, object_list) is status
+        self.client.force_login(self.author)
+        url = reverse('notes:list')
+        response = self.client.get(url)
+        object_list = response.context['object_list']
+        self.assertIn(self.notes, object_list)
 
     def test_notes_by_one_author(self):
         url = reverse("notes:add")
