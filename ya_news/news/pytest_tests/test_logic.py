@@ -33,10 +33,10 @@ def test_anonymous_user_cant_create_comment(client, form_data, news):
     assert comments_count == 0
 
 
-def test_warning_words(author_client, form_data):
+def test_warning_words(author_client, form_data, news):
     "Проверка на наличии запрещенных слов"
     bad_words_data = f'Text {BAD_WORDS[0]}'
-    url = reverse('news:edit')
+    url = reverse('news:detail', args=(news.id,))
     response = author_client.post(url, data=bad_words_data)
     assertFormError(
         response,
