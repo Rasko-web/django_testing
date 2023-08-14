@@ -36,14 +36,14 @@ def test_anonymous_user_cant_create_comment(client, form_data, news):
 @pytest.mark.django_db
 def test_warning_words(author_client, form_data, news):
     "Проверка на наличии запрещенных слов"
-    bad_words_data = f'Text {BAD_WORDS[0]}'
     url = reverse('news:detail', args=(news.id,))
-    response = author_client.post(url, data=bad_words_data)
+    form_data['text'] = f'Text {BAD_WORDS[0]}'
+    response = author_client.post(url, data=form_data)
     assertFormError(
         response,
-        form='form',
-        field='text',
-        errors=WARNING
+        'form',
+        'text',
+        WARNING
     )
     comments_count = Comment.objects.count()
     assert comments_count == 0
