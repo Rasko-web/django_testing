@@ -27,11 +27,24 @@ class TestNoteCreation(TestCase):
         cls.author_client.force_login(cls.author)
         cls.reader_client = Client()
         cls.reader_client.force_login(cls.reader)
-        cls.form_data = {'text': cls.NOTE_TEXT}
+        cls.form_data = {
+            'title': 'Title',
+            'text': 'Text',
+            'slug': 'new_slug',
+        }
+
+    def test_auth_user_can_create_note(self):
+        url = reverse('notes:add')
+        response = self.author_client.post(url, data=self.form_data)
+        self.assertRedirects(response, reverse('notes:success'))
+        note_count = Note.objects.count()
+        self.assertEqual(note_count, 1)
+        new_note = Note.objects.get()
+        self.assertEqual(new_note.author == self.author)
 
     def test_anonymous_user_cant_create_note(self):
         "Анонимный пользователь не может оставить заметку"
-        url = reverse('notes:detail', args=(self.notes.slug,))
+        url = reverse('notes:add')
         response = self.user_client.post(url, data=self.form_data)
         self.assertEqual(response, HTTPStatus.NOT_FOUND)
         note_count = Note.objects.count()
