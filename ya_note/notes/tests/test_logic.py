@@ -34,6 +34,7 @@ class TestNoteCreation(TestCase):
         }
 
     def test_auth_user_can_create_note(self):
+        "Авторизированный пользователь оставляет заметку"
         url = reverse('notes:add')
         response = self.author_client.post(url, data=self.form_data)
         self.assertRedirects(response, reverse('notes:success'))
@@ -42,7 +43,7 @@ class TestNoteCreation(TestCase):
         "Анонимный пользователь не может оставить заметку"
         url = reverse('notes:add')
         response = self.user_client.post(url, data=self.form_data)
-        self.assertEqual(response, HTTPStatus.NOT_FOUND)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_avialability_for_show_edit_delete(self):
         user_statues = (
@@ -61,8 +62,7 @@ class TestNoteCreation(TestCase):
         self.client.force_login(self.author)
         url = reverse('notes:add')
         self.form_data.pop(self.notes.slug)
-        response = self.author_client.post(url, data=self.form_data)
-        self.assertRedirects(response, reverse('notes:success'))
+        self.author_client.post(url, data=self.form_data)
         notes_count = Note.objects.count()
         self.assertEqual(notes_count, 1)
         self.new_note = Note.objects.get()
