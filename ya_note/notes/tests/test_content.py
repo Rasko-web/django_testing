@@ -24,11 +24,11 @@ class TestNote(TestCase):
         "Проверка наличия формы на странице создания и редактирования"
         urls = (
             ('notes:add', None),
-            ('notes:edit', self.notes.id)
+            ('notes:edit', (self.notes.id,))
         )
         for name, argument in urls:
             self.client.force_login(self.author)
-            url = reverse(name, args=(argument,))
+            url = reverse(name, args=argument)
             response = self.client.get(url)
             self.assertIn('form', response.context)
 
@@ -41,12 +41,9 @@ class TestNote(TestCase):
         self.assertIn(self.notes, object_list)
 
     def test_notes_by_one_author(self):
-        url = reverse("notes:add")
-        self.client.force_login(self.author)
-        response = self.client.post(url, data=self.form_data)
-        self.assertRedirects(response, reverse('notes:success'))
-        notes_count = Note.objects.count()
-        self.assertEqual(notes_count, 1)
-        new_note = Note.objects.get()
-        self.assertEqual(new_note.author, self.author)
-        self.assertEqual(new_note.text, self.form_data['text'])
+        "Нет заметок от другого пользователя"
+        url = reverse("notes:list")
+        self.client.force_login(self.reader)
+        response = self.client.get(url)
+        object_list = response.context['object_list']
+        self.assertNotIn(self.notes, object_list)
