@@ -15,7 +15,6 @@ class TestNoteCreation(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.notes = Note.objects.create(title='Заголовок', text='Текст')
-        cls.url = reverse('notes:detail', args=(cls.notes.id,))
         cls.user = User.objects.create(username="Простой Человек")
         cls.auth_client = Client()
         cls.auth_client.force_login(cls.user)
@@ -23,14 +22,16 @@ class TestNoteCreation(TestCase):
 
     def test_anonymous_user_cant_create_note(self):
         "Анонимный пользователь не может оставить заметку"
-        self.client.post(self.url, data=self.form_data)
+        url = reverse('notes:detail', args=(self.notes.id,))
+        self.client.post(url, data=self.form_data)
         note_count = Note.objects.count()
         self.assertEqual(note_count, 0)
 
     def test_user_can_create_note(self):
         "Пользователь может оставить заметку"
-        response = self.auth_client.post(self.url, data=self.form_data)
-        self.assertRedirects(response, f'{self.url}#list')
+        url = reverse('notes:detail', args=(self.notes.id,))
+        response = self.auth_client.post(url, data=self.form_data)
+        self.assertRedirects(response, f'{url}#list')
         note_count = Note.objects.count()
         self.assertEqual(note_count, 1)
         note = Note.objects.get()
@@ -45,7 +46,6 @@ class TestNoteEditDelite(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.notes = Note.objects.create(title='Заголовок', text='Текст')
         cls.url = reverse('notes:detail', args=(cls.notes.id,))
         cls.author = User.objects.create(username="Автор")
         cls.author_client = Client()
