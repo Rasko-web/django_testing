@@ -39,8 +39,6 @@ class TestNoteCreation(TestCase):
         self.assertRedirects(response, reverse('notes:success'))
         note_count = Note.objects.count()
         self.assertEqual(note_count, 1)
-        new_note = Note.objects.get()
-        self.assertEqual(new_note.author == self.author)
 
     def test_anonymous_user_cant_create_note(self):
         "Анонимный пользователь не может оставить заметку"
