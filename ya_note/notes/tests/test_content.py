@@ -30,7 +30,13 @@ class TestNote(TestCase):
             self.client.force_login(self.author)
             url = reverse(name, args=argument)
             response = self.client.get(url)
-            self.assertIn('form', response.context)
+            self.assertIn('form', response)
+
+    def test_author_have_form_on_add(self):
+        self.client.force_login(self.author)
+        url = reverse('notes:add')
+        response = self.client.get(url)
+        self.assertIn('form', response)
 
     def test_note_in_context(self):
         "отдельная заметка передаётся на страницу со списком заметок в списке"
