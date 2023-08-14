@@ -1,4 +1,4 @@
-from django.test import Client, TestCase
+from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from notes.models import Note
@@ -12,11 +12,7 @@ class TestNote(TestCase):
     def setUpTestData(cls):
         cls.notes = Note.objects.create(title='Заголовок', text='Текст')
         cls.author = User.objects.create(username="Автор")
-        cls.author_client = Client()
-        cls.author_client.force_login(cls.author)
         cls.reader = User.objects.create(username="Читатель")
-        cls.reader_client = Client()
-        cls.reader_client.force_login(cls.reader)
         cls.notes = Note.objects.create(
             title='Заголовок',
             text='Текст',
@@ -27,14 +23,16 @@ class TestNote(TestCase):
 
     def test_author_have_form_on_add(self):
         "Проверка наличия формы на странице создания"
+        self.client.force_login(self.author)
         url = reverse('notes:add')
-        response = self.author_client.get(url)
+        response = self.client.get(url)
         self.assertIn('from', response.context)
 
     def test_author_have_form_on_edit(self):
         "Проверка наличия формы на странице редактированя"
+        self.client.force_login(self.author)
         url = reverse('notes:edit', args=self.notes.slug)
-        response = self.author_client.get(url)
+        response = self.client.get(url)
         self.assertIn('from', response.context)
 
     def test_note_in_context(self):
