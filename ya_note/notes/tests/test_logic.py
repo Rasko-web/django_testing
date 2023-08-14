@@ -5,6 +5,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from notes.models import Note
+from notes.forms import WARNING
 
 User = get_user_model()
 
@@ -63,10 +64,8 @@ class TestNoteCreation(TestCase):
         "Тест на пустой Slug"
         self.client.force_login(self.author)
         url = reverse('notes:add')
-        self.form_data.pop(self.notes.slug)
+        self.form_data.pop('slug')
         self.author_client.post(url, data=self.form_data)
-        notes_count = Note.objects.count()
-        self.assertEqual(notes_count, 1)
         self.new_note = Note.objects.get()
         self.expected_slug = slugify(self.form_data['title'])
         self.assertEqual(self.new_note.slug, self.expected_slug)
@@ -75,8 +74,11 @@ class TestNoteCreation(TestCase):
         "Тест на неуникальный Slug"
         self.client.force_login(self.author)
         url = reverse('notes:add')
-        self.form_data[self.notes.slug] = self.notes.id
-        response = self.author_client.get(url, data=self.form_data)
-        self.assertRedirects(response, reverse('notes:add'))
-        note_count = Note.objects.count()
-        self.assertEqual(note_count, 1)
+        self.form_data['slug'] = self.notes.slug
+        response = self.author_client.post(url, data=self.form_data)
+        self.assertFormError(
+            response,
+            'form',
+            'slug',
+            self.notes.slug + WARNING
+        )
