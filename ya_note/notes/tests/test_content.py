@@ -22,7 +22,7 @@ class TestNote(TestCase):
 
     def test_author_have_form_on_edit(self):
         self.client.force_login(self.author)
-        url = reverse('notes:edit', args=(self.notes.id,))
+        url = reverse('notes:edit', args=(self.notes.slug,))
         response = self.client.get(url)
         self.assertIn('form', response.context)
 
