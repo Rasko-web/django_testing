@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from pytils.translit import slugify
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
@@ -64,9 +65,12 @@ class TestNoteCreation(TestCase):
         self.client.force_login(self.author)
         url = reverse('notes:add')
         self.form_data.pop('slug')
-        self.author_client.post(url, data=self.form_data)
-        # self.assertRedirects(response, reverse('notes:success'))
-        self.assertEqual(Note.objects.count(), 1)
+        response = self.author_client.post(url, data=self.form_data)
+        self.assertRedirects(response, reverse('notes:success'))
+        self.assertEqual(Note.objects.count(), 2)
+        new_note = Note.objects.get()
+        expected_slug = slugify(self.form_data['title'])
+        self.assertEqual(new_note.slug, expected_slug)
 
     def test_not_unique_slug(self):
         "Тест на неуникальный Slug"
