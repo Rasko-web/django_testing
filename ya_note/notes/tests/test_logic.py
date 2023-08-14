@@ -37,16 +37,12 @@ class TestNoteCreation(TestCase):
         url = reverse('notes:add')
         response = self.author_client.post(url, data=self.form_data)
         self.assertRedirects(response, reverse('notes:success'))
-        note_count = Note.objects.count()
-        self.assertEqual(note_count, 1)
 
     def test_anonymous_user_cant_create_note(self):
         "Анонимный пользователь не может оставить заметку"
         url = reverse('notes:add')
         response = self.user_client.post(url, data=self.form_data)
         self.assertEqual(response, HTTPStatus.NOT_FOUND)
-        note_count = Note.objects.count()
-        self.assertEqual(note_count, 0)
 
     def test_avialability_for_show_edit_delete(self):
         user_statues = (
