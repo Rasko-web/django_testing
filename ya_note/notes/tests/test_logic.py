@@ -43,7 +43,9 @@ class TestNoteCreation(TestCase):
         "Анонимный пользователь не может оставить заметку"
         url = reverse('notes:add')
         response = self.user_client.post(url, data=self.form_data)
-        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        login_url = reverse('users:login')
+        expected_url = f'{login_url}?next={url}'
+        self.assertRedirects(response, expected_url)
 
     def test_avialability_for_show_edit_delete(self):
         user_statues = (
