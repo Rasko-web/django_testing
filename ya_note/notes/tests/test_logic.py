@@ -10,7 +10,7 @@ from notes.forms import WARNING
 User = get_user_model()
 
 
-class TestNoteCreation(TestCase):
+class TestNoteLogic(TestCase):
     NOTE_TEXT = "Текст Заметки"
     NEW_NOTE_TEXT = "Обновленная заметка"
 
@@ -33,6 +33,18 @@ class TestNoteCreation(TestCase):
             'text': 'Text',
             'slug': 'new_slug',
         }
+
+    def test_empty_slug(self):
+        "Тест на пустой Slug"
+        self.client.force_login(self.author)
+        url = reverse('notes:add')
+        self.form_data.pop('slug')
+        response = self.author_client.post(url, data=self.form_data)
+        self.assertRedirects(response, reverse('notes:success'))
+        self.assertEqual(Note.objects.count(), 1)
+        new_note = Note.objects.get()
+        expected_slug = slugify(self.form_data['title'])
+        self.assertEqual(new_note.slug, expected_slug)
 
     def test_auth_user_can_create_note(self):
         "Авторизированный пользователь оставляет заметку"
@@ -59,18 +71,6 @@ class TestNoteCreation(TestCase):
                     url = reverse(name, args=(self.notes.slug,))
                     response = user.get(url)
                     self.assertEqual(response.status_code, status)
-
-    def test_empty_slug(self):
-        "Тест на пустой Slug"
-        self.client.force_login(self.author)
-        url = reverse('notes:add')
-        self.form_data.pop('slug')
-        response = self.author_client.post(url, data=self.form_data)
-        self.assertRedirects(response, reverse('notes:success'))
-        self.assertEqual(Note.objects.count(), 2)
-        new_note = Note.objects.get()
-        expected_slug = slugify(self.form_data['title'])
-        self.assertEqual(new_note.slug, expected_slug)
 
     def test_not_unique_slug(self):
         "Тест на неуникальный Slug"
