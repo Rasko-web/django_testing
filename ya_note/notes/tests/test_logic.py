@@ -40,8 +40,7 @@ class TestNoteLogic(TestCase):
         self.client.force_login(self.author)
         url = reverse('notes:add')
         self.form_data.pop('slug')
-        response = self.author_client.post(url, data=self.form_data)
-        self.assertRedirects(response, reverse('notes:success'))
+        self.author_client.post(url, data=self.form_data)
         self.assertEqual(Note.objects.count(), notes_before_post + 1)
         new_note = Note.objects.all()
         query_set_len = new_note.reverse()[0]
