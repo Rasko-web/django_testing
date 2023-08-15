@@ -46,26 +46,32 @@ class TestRoutes(TestCase):
             self.client.force_login(user)
             for name in ('notes:detail', 'notes:delete', 'notes:edit'):
                 with self.subTest(user=user, name=name):
-                    url = reverse(name, args=(self.notes.id,))
+                    url = reverse(name, args=(self.notes.slug,))
                     response = self.client.get(url)
                     self.assertEqual(response.status_code, status)
 
     def test_redirect_fro_aninymos_client(self):
         "Тест на редирект анонимного пользователя"
         urls = (
-            'notes:success',
-            'notes:add',
-            'notes:detail',
-            'notes:edit',
-            'notes:delete'
+            ('notes:add', None),
+            ('notes:success', None),
+            ('notes:detail', self.notes.slug),
+            ('notes:edit', self.notes.slug),
+            ('notes:delete', self.notes.slug),
         )
         login_url = reverse('users:login')
-        for name in urls:
-            with self.subTest(name=name):
-                url = reverse(name, args=(self.notes.id,))
-                redirect_url = f'{login_url}?next={url}'
-                response = self.client.get(url)
-                self.assertRedirects(response, redirect_url)
+        for name, slug in urls:
+            with self.subTest(name=name, slug=slug):
+                if slug is None:
+                    url = reverse(name)
+                    redirect_url = f'{login_url}?next={url}'
+                    response = self.client.get(url)
+                    self.assertRedirects(response, redirect_url)
+                else:
+                    url = reverse(name, args=(slug,))
+                    redirect_url = f'{login_url}?next={url}'
+                    response = self.client.get(url)
+                    self.assertRedirects(response, redirect_url)
 
     def test_note_availability_for_auth_user(self):
         "Доступность списка заметок, добавление новой заметки"
@@ -77,6 +83,6 @@ class TestRoutes(TestCase):
             self.client.force_login(user)
             for name in ('notes:detail', 'notes:delete', 'notes:edit'):
                 with self.subTest(user=user, name=name):
-                    url = reverse(name, args=(self.notes.id,))
+                    url = reverse(name, args=(self.notes.slug,))
                     response = self.client.get(url)
                     self.assertEqual(response.status_code, status)
