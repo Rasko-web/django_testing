@@ -29,8 +29,8 @@ class TestNoteLogic(TestCase):
         cls.reader_client = Client()
         cls.reader_client.force_login(cls.reader)
         cls.form_data = {
-            'title': 'Title',
-            'text': 'Text',
+            'title': 'Заголовок',
+            'text': 'Текст',
             'slug': 'new_slug',
         }
 
