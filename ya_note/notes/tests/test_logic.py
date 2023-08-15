@@ -36,15 +36,17 @@ class TestNoteLogic(TestCase):
 
     def test_empty_slug(self):
         "Тест на пустой Slug"
+        notes_before_post = Note.objects.count()
         self.client.force_login(self.author)
         url = reverse('notes:add')
         self.form_data.pop('slug')
         response = self.author_client.post(url, data=self.form_data)
         self.assertRedirects(response, reverse('notes:success'))
-        self.assertEqual(Note.objects.count(), 1)
-        new_note = Note.objects.get()
+        self.assertEqual(Note.objects.count(), notes_before_post + 1)
+        new_note = Note.objects.all()
+        query_set_len = new_note.reverse()[0]
         expected_slug = slugify(self.form_data['title'])
-        self.assertEqual(new_note.slug, expected_slug)
+        self.assertEqual(query_set_len.slug, expected_slug)
 
     def test_auth_user_can_create_note(self):
         "Авторизированный пользователь оставляет заметку"
