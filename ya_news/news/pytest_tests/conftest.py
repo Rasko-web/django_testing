@@ -17,6 +17,12 @@ def author_client(author, client):
 
 
 @pytest.fixture
+def home_url():
+    HOME_URL = 'news:home'
+    return HOME_URL
+
+
+@pytest.fixture
 def news(author):
     news = News.objects.create(
         title='Заголовок',

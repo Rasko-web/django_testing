@@ -1,21 +1,26 @@
 import pytest
 from django.urls import reverse
+from yanews import settings
+from news.forms import CommentForm
+
+
+COUNT_NEWS_ON_PAGE = settings.NEWS_COUNT_ON_HOME_PAGE
 
 
 @pytest.mark.django_db
-def test_count_on_news_page(list_of_news, client):
-    "Тест на колличество записей на странице"
-    url = reverse('news:home')
+def test_count_on_news_page(list_of_news, client, home_url):
+    """Тест на колличество записей на странице"""
+    url = reverse(home_url)
     response = client.get(url)
     object_list = response.context['object_list']
     news_count = len(object_list)
-    assert news_count == 10
+    assert news_count == COUNT_NEWS_ON_PAGE
 
 
 @pytest.mark.django_db
-def test_news_order(list_of_news, client):
-    "Порядок новостей"
-    url = reverse('news:home')
+def test_news_order(list_of_news, client, home_url):
+    """Порядок новостей"""
+    url = reverse(home_url)
     response = client.get(url)
     object_list = response.context['object_list']
     all_dates = [list_of_news.date for list_of_news in object_list]
@@ -25,7 +30,7 @@ def test_news_order(list_of_news, client):
 
 @pytest.mark.django_db
 def test_comments_order(pk_for_args, client, comments_list):
-    "Порядок комментариев"
+    """Порядок комментариев"""
     url = reverse('news:detail', args=(pk_for_args))
     response = client.get(url)
     assert 'news' in response.context
@@ -35,14 +40,14 @@ def test_comments_order(pk_for_args, client, comments_list):
 
 
 def test_anonymous_client_has_no_form(client, pk_for_args):
-    "Аноним не имеет формы отправки комментария"
+    """Аноним не имеет формы отправки комментария"""
     url = reverse('news:detail', args=(pk_for_args))
     response = client.get(url)
     assert 'form' not in response.context
 
 
 def test_auth__client_have_form(admin_client, pk_for_args):
-    "Авторизированныей пользователь имеет форму отправки комментария"
+    """Авторизированныей пользователь имеет форму отправки комментария"""
     url = reverse('news:detail', args=(pk_for_args))
     response = admin_client.get(url)
-    assert 'form' in response.context
+    assert isinstance('form', CommentForm) in response.context
