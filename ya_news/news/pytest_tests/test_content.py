@@ -51,4 +51,4 @@ def test_auth__client_have_form(admin_client, pk_for_args):
     url = reverse('news:detail', args=(pk_for_args))
     response = admin_client.get(url)
     assert 'form' in response.context
-    assert isinstance('form', CommentForm) in response.context
+    assert isinstance(response.context['form'], CommentForm)
